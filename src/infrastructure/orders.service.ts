@@ -434,16 +434,10 @@ export interface WhatsappLinkResponse {
 /**
  * Llama a POST /orders/whatsapp-link para que el backend valide el carrito,
  * cree la Order en estado PENDING y devuelva el link de WhatsApp.
- * El token de reCAPTCHA viaja en el header `x-recaptcha-token`.
  */
 export const createWhatsappLink = async (
   payload: CreateWhatsappLinkPayload,
-  recaptchaToken: string,
 ): Promise<WhatsappLinkResponse> => {
-  const response = await api.post<WhatsappLinkResponse>('/orders/whatsapp-link', payload, {
-    headers: {
-      'x-recaptcha-token': recaptchaToken,
-    },
-  });
+  const response = await api.post<WhatsappLinkResponse>('/orders/whatsapp-link', payload);
   return response.data;
 };

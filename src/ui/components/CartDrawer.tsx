@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useCartStore } from '@/infrastructure/cart_manager';
 import { useCustomerStore } from '@/infrastructure/customer_manager';
 import { createWhatsappLink } from '@/infrastructure/orders.service';
-import { getRecaptchaToken } from '@/infrastructure/recaptcha';
 import { formatKg } from '@/lib/openBag';
 import { formatARS, roundToWholePeso } from '@/lib/format';
 import {
@@ -104,15 +103,11 @@ export const CartDrawer = ({ isOpen, onOpenChange }: CartDrawerProps) => {
         };
       });
 
-      const recaptchaToken = await getRecaptchaToken('order_whatsapp');
-      const { link } = await createWhatsappLink(
-        {
-          cart,
-          customerName: customerName.trim(),
-          customerPhone: customerPhone.trim(),
-        },
-        recaptchaToken,
-      );
+      const { link } = await createWhatsappLink({
+        cart,
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+      });
 
       // Recién acá, con el link generado y validado por el backend,
       // abrimos WhatsApp. Nunca armamos el link a mano en el cliente.
