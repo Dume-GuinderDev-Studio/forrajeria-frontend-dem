@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ClipboardEvent as ReactClipboardEvent } from 'react';
-import { ShoppingBag, Scale, X, Plus, Calculator } from 'lucide-react';
+import { ShoppingBag, Scale, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseLocalizedNumber } from '@/lib/numbers';
 import {
@@ -28,43 +28,50 @@ interface PresentationRow {
 interface ProductPresentationsSectionProps {
   product?: Product | null;
   onPresentationsChange: (data: {
-    bagRows: PresentationRow[];
+    bagRow: PresentationRow | null;
     kiloEnabled: boolean;
     kiloPrice: number | null;
     kiloCost: number | null;
   }) => void;
   errors?: {
-    duplicateWeight?: string;
     kiloRequired?: string;
   };
 }
+
+const emptyBagRow = (): PresentationRow => ({
+  id: crypto.randomUUID(),
+  weightKg: null,
+  price: null,
+  cost: null,
+  marginPct: null,
+  openBagRemainingKg: null,
+});
 
 export const ProductPresentationsSection = ({
   product,
   onPresentationsChange,
   errors,
 }: ProductPresentationsSectionProps) => {
-  const [bagRows, setBagRows] = useState<PresentationRow[]>([]);
+  const [bagRow, setBagRow] = useState<PresentationRow | null>(null);
   const [kiloEnabled, setKiloEnabled] = useState(false);
   const [kiloPrice, setKiloPrice] = useState<number | null>(null);
   const [kiloCost, setKiloCost] = useState<number | null>(null);
   // Margen % solo para cálculo en el momento (no se persiste).
   const [kiloMargin, setKiloMargin] = useState<number | null>(null);
-  const [kiloSourceBagId, setKiloSourceBagId] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
+  // Cantidad de configuraciones de bolsa legacy (>1) encontradas al hidratar.
+  const [legacyBagCount, setLegacyBagCount] = useState(0);
 
   // Cargar datos existentes al inicio
   useEffect(() => {
     if (!product) {
       // Producto nuevo
-      setBagRows([
-        { id: crypto.randomUUID(), weightKg: null, price: null, cost: null, marginPct: null, openBagRemainingKg: null },
-      ]);
+      setBagRow(emptyBagRow());
       setKiloEnabled(false);
       setKiloPrice(null);
       setKiloCost(null);
       setKiloMargin(null);
-      setKiloSourceBagId('');
+      setLegacyBagCount(0);
       setIsInitialized(true);
       return;
     }
@@ -75,32 +82,32 @@ export const ProductPresentationsSection = ({
     const hasKiloPresentation = product.presentations?.some((p) => p.type === 'kilo' && p.price);
 
     if (hasPresentations && (hasBagPresentation || hasKiloPresentation) && product.presentations) {
-      const bags = product.presentations
-        .filter((p) => p.type === 'bag' && p.price)
-        .map((p) => ({
-          id: p.id || crypto.randomUUID(),
-          weightKg: p.weightKg,
-          price: p.price,
-          cost: p.cost ?? null,
-          marginPct: null as number | null,
-          openBagRemainingKg: p.openBagRemainingKg ?? null,
-        }));
+      const bags = product.presentations.filter((p) => p.type === 'bag' && p.price);
 
+      // Decisión: el formulario solo soporta UNA bolsa. Si el producto legacy
+      // trae más de una, se muestra la primera y se avisa (no bloqueante).
+      // Nada se borra hasta que el usuario guarde: el backend recibe el array
+      // con la única bolsa visible al momento del submit.
+      if (bags.length > 1) {
+        setLegacyBagCount(bags.length);
+      } else {
+        setLegacyBagCount(0);
+      }
+
+      const firstBag = bags[0];
       const kilo = product.presentations.find((p) => p.type === 'kilo' && p.price);
 
-      setBagRows(
-        bags.length > 0
-          ? bags
-          : [
-              {
-                id: crypto.randomUUID(),
-                weightKg: null,
-                price: null,
-                cost: null,
-                marginPct: null,
-                openBagRemainingKg: null,
-              },
-            ],
+      setBagRow(
+        firstBag
+          ? {
+              id: firstBag.id || crypto.randomUUID(),
+              weightKg: firstBag.weightKg,
+              price: firstBag.price,
+              cost: firstBag.cost ?? null,
+              marginPct: null as number | null,
+              openBagRemainingKg: firstBag.openBagRemainingKg ?? null,
+            }
+          : emptyBagRow(),
       );
       setKiloEnabled(!!kilo);
       setKiloPrice(kilo?.price ?? null);
@@ -109,41 +116,27 @@ export const ProductPresentationsSection = ({
     }
     // Fallback legacy: crear desde pricePerBag/Kilo
     else if (product.pricePerBag || product.pricePerKilo) {
-      const bags = product.pricePerBag
-        ? [
-            {
+      setBagRow(
+        product.pricePerBag
+          ? {
               id: crypto.randomUUID(),
               weightKg: null,
               price: product.pricePerBag,
               cost: null,
               marginPct: null as number | null,
               openBagRemainingKg: product.openBagRemainingKg ?? null,
-            },
-          ]
-        : [];
-      setBagRows(
-        bags.length > 0
-          ? bags
-          : [
-              {
-                id: crypto.randomUUID(),
-                weightKg: null,
-                price: null,
-                cost: null,
-                marginPct: null,
-                openBagRemainingKg: null,
-              },
-            ],
+            }
+          : emptyBagRow(),
       );
+      setLegacyBagCount(0);
       setKiloEnabled(!!product.pricePerKilo);
       setKiloPrice(product.pricePerKilo ?? null);
       setKiloCost(null);
       setKiloMargin(null);
     } else {
-      // Producto sin presentaciones - mostrar una fila vacía por defecto
-      setBagRows([
-        { id: crypto.randomUUID(), weightKg: null, price: null, cost: null, marginPct: null, openBagRemainingKg: null },
-      ]);
+      // Producto sin presentaciones - mostrar el bloque de bolsa vacío por defecto
+      setBagRow(emptyBagRow());
+      setLegacyBagCount(0);
       setKiloEnabled(false);
       setKiloPrice(null);
       setKiloCost(null);
@@ -156,59 +149,41 @@ export const ProductPresentationsSection = ({
   // Notify parent solo cuando está inicializado
   useEffect(() => {
     if (isInitialized) {
-      onPresentationsChange({ bagRows, kiloEnabled, kiloPrice, kiloCost });
+      onPresentationsChange({ bagRow, kiloEnabled, kiloPrice, kiloCost });
     }
-  }, [bagRows, kiloEnabled, kiloPrice, kiloCost, isInitialized, onPresentationsChange]);
-
-  const addBagRow = () => {
-    setBagRows([
-      ...bagRows,
-      { id: crypto.randomUUID(), weightKg: null, price: null, cost: null, marginPct: null, openBagRemainingKg: null },
-    ]);
-  };
-
-  const removeBagRow = (id: string) => {
-    if (bagRows.length > 1) {
-      setBagRows(bagRows.filter((row) => row.id !== id));
-    }
-  };
+  }, [bagRow, kiloEnabled, kiloPrice, kiloCost, isInitialized, onPresentationsChange]);
 
   const updateBagRow = (
-    id: string,
     field: 'weightKg' | 'price' | 'cost' | 'marginPct' | 'openBagRemainingKg',
     value: string | number | null,
   ) => {
-    setBagRows(
-      bagRows.map((row) => {
-        if (row.id === id) {
-          // Kg restantes admite 0 (bolsa recién terminada); negativos o NaN → null.
-          if (field === 'openBagRemainingKg') {
-            if (value === '' || value === null || value === undefined) {
-              return { ...row, openBagRemainingKg: null };
-            }
-            const n = Number(value);
-            return {
-              ...row,
-              openBagRemainingKg: Number.isFinite(n) && n >= 0 ? n : null,
-            };
-          }
-          const parsed =
-            field === 'marginPct'
-              ? typeof value === 'string'
-                ? parseMarginInput(value)
-                : value
-              : value === ''
-                ? null
-                : typeof value === 'string'
-                  ? field === 'price' || field === 'cost'
-                    ? parseLocalizedNumber(value)
-                    : parseFloat(value) || null
-                  : value;
-          return { ...row, [field]: parsed };
+    setBagRow((prev) => {
+      const row = prev ?? emptyBagRow();
+      // Kg restantes admite 0 (bolsa recién terminada); negativos o NaN → null.
+      if (field === 'openBagRemainingKg') {
+        if (value === '' || value === null || value === undefined) {
+          return { ...row, openBagRemainingKg: null };
         }
-        return row;
-      }),
-    );
+        const n = Number(value);
+        return {
+          ...row,
+          openBagRemainingKg: Number.isFinite(n) && n >= 0 ? n : null,
+        };
+      }
+      const parsed =
+        field === 'marginPct'
+          ? typeof value === 'string'
+            ? parseMarginInput(value)
+            : value
+          : value === ''
+            ? null
+            : typeof value === 'string'
+              ? field === 'price' || field === 'cost'
+                ? parseLocalizedNumber(value)
+                : parseFloat(value) || null
+              : value;
+      return { ...row, [field]: parsed };
+    });
   };
 
   /**
@@ -227,19 +202,18 @@ export const ProductPresentationsSection = ({
     apply(parseLocalizedNumber(pasted));
   };
 
-  /** Calcula el precio sugerido de una bolsa: precio = costo * (1 + margen/100). */
-  const calcBagPrice = (id: string) => {
-    const row = bagRows.find((r) => r.id === id);
-    if (!row || row.cost === null || row.cost === undefined) {
+  /** Calcula el precio sugerido de la bolsa: precio = costo * (1 + margen/100). */
+  const calcBagPrice = () => {
+    if (!bagRow || bagRow.cost === null || bagRow.cost === undefined) {
       toast.error('Cargá el costo de la bolsa para calcular el precio');
       return;
     }
-    const suggested = calcSuggestedPrice(row.cost, row.marginPct);
+    const suggested = calcSuggestedPrice(bagRow.cost, bagRow.marginPct);
     if (suggested === null) {
       toast.error('Costo o margen inválido');
       return;
     }
-    updateBagRow(id, 'price', suggested);
+    updateBagRow('price', suggested);
     toast.success(`Precio sugerido: $${suggested}`);
   };
 
@@ -258,22 +232,21 @@ export const ProductPresentationsSection = ({
     toast.success(`Precio por kilo sugerido: $${suggested}`);
   };
 
-  /** Prorratea el precio por kilo desde el costo de una bolsa. */
-  const calcKiloPriceFromSelectedBag = () => {
-    const bag = bagRows.find((r) => r.id === kiloSourceBagId);
-    if (!bag) {
-      toast.error('Elegí una bolsa como base del cálculo');
+  /** Prorratea el precio por kilo desde el costo de la bolsa única. */
+  const calcKiloPriceFromBagCost = () => {
+    if (!bagRow) {
+      toast.error('Cargá primero la bolsa para prorratear el precio');
       return;
     }
-    if (bag.cost === null || bag.cost === undefined) {
-      toast.error('La bolsa elegida no tiene costo cargado');
+    if (bagRow.cost === null || bagRow.cost === undefined) {
+      toast.error('La bolsa no tiene costo cargado');
       return;
     }
-    if (!bag.weightKg || bag.weightKg <= 0) {
-      toast.error('La bolsa elegida no tiene un peso válido');
+    if (!bagRow.weightKg || bagRow.weightKg <= 0) {
+      toast.error('La bolsa no tiene un peso válido');
       return;
     }
-    const suggested = calcKiloPriceFromBag(bag.cost, kiloMargin, bag.weightKg);
+    const suggested = calcKiloPriceFromBag(bagRow.cost, kiloMargin, bagRow.weightKg);
     if (suggested === null) {
       toast.error('Costo, margen o peso inválido');
       return;
@@ -282,16 +255,13 @@ export const ProductPresentationsSection = ({
     toast.success(`Precio por kilo prorrateado: $${suggested}`);
   };
 
-  const bagsWithCost = bagRows.filter(
-    (r) => r.cost !== null && r.cost !== undefined && r.weightKg !== null && r.weightKg > 0,
-  );
+  const bagHasCost =
+    bagRow?.cost !== null &&
+    bagRow?.cost !== undefined &&
+    bagRow?.weightKg !== null &&
+    (bagRow?.weightKg ?? 0) > 0;
 
-  // Check for duplicate weights
-  const weights = bagRows.map((r) => r.weightKg).filter((w) => w !== null && w > 0);
-  const hasDuplicateWeight = weights.length !== new Set(weights).size;
-  const duplicateWeightError = hasDuplicateWeight
-    ? 'No puedes tener dos bolsas con el mismo peso'
-    : '';
+  const row = bagRow ?? emptyBagRow();
 
   return (
     <div className="space-y-6">
@@ -300,115 +270,98 @@ export const ProductPresentationsSection = ({
         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <ShoppingBag size={16} /> Venta por Bolsa
         </label>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Definí cómo se ofrece la bolsa cerrada en la tienda online.
+        </p>
 
-        {bagRows.map((row) => (
-          <div
-            key={row.id}
-            className="rounded-xl border border-slate-200 dark:border-slate-600 p-3 space-y-2 bg-slate-50/50 dark:bg-slate-900/30"
+        {legacyBagCount > 1 && (
+          <p
+            role="alert"
+            className="text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2"
           >
-            <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 items-start">
-              <div className="space-y-1">
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  placeholder="Peso (kg)"
-                  value={row.weightKg ?? ''}
-                  onChange={(e) => updateBagRow(row.id, 'weightKg', e.target.value)}
-                  className={`w-full px-3 py-2 rounded-lg border ${hasDuplicateWeight && row.weightKg ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm`}
-                />
-              </div>
-              <div className="space-y-1">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Precio ($)"
-                  value={row.price ?? ''}
-                  onChange={(e) => updateBagRow(row.id, 'price', e.target.value)}
-                  onPaste={(e) =>
-                    handleMoneyPaste(e, (n) => updateBagRow(row.id, 'price', n))
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Costo ($)"
-                  value={row.cost ?? ''}
-                  onChange={(e) => updateBagRow(row.id, 'cost', e.target.value)}
-                  onPaste={(e) =>
-                    handleMoneyPaste(e, (n) => updateBagRow(row.id, 'cost', n))
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => removeBagRow(row.id)}
-                disabled={bagRows.length === 1}
-                className="p-2 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
+            Este producto tenía {legacyBagCount} configuraciones de bolsa; se muestra la primera.
+            Revisalo antes de guardar.
+          </p>
+        )}
+
+        <div className="rounded-xl border border-slate-200 dark:border-slate-600 p-3 space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+            <div className="space-y-1">
               <input
                 type="number"
-                step="0.1"
-                placeholder="Margen (%)"
-                title="Margen % (solo cálculo, no se guarda)"
-                value={row.marginPct ?? ''}
-                onChange={(e) => updateBagRow(row.id, 'marginPct', e.target.value)}
-                className="w-28 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
+                step="0.5"
+                min="0"
+                placeholder="Peso (kg)"
+                value={row.weightKg ?? ''}
+                onChange={(e) => updateBagRow('weightKg', e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
-              <button
-                type="button"
-                onClick={() => calcBagPrice(row.id)}
-                title="Precio = costo × (1 + margen/100). El precio sigue siendo editable."
-                className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-              >
-                <Calculator size={13} />
-                Calcular precio
-              </button>
             </div>
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">
-                Bolsa abierta (kg restantes){' '}
-                <span className="font-normal text-slate-400 dark:text-slate-500">(opcional)</span>
-              </label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Ej. 4.5"
-                title="Kg que quedan en la bolsa físicamente abierta"
-                value={row.openBagRemainingKg ?? ''}
-                onChange={(e) => updateBagRow(row.id, 'openBagRemainingKg', e.target.value)}
-                className="w-full max-w-[220px] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Precio ($)"
+                value={row.price ?? ''}
+                onChange={(e) => updateBagRow('price', e.target.value)}
+                onPaste={(e) => handleMoneyPaste(e, (n) => updateBagRow('price', n))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                Dejalo vacío si no hay bolsa abierta.
-              </p>
+            </div>
+            <div className="space-y-1">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Costo ($)"
+                value={row.cost ?? ''}
+                onChange={(e) => updateBagRow('cost', e.target.value)}
+                onPaste={(e) => handleMoneyPaste(e, (n) => updateBagRow('cost', n))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
           </div>
-        ))}
-
-        {duplicateWeightError && (
-          <p className="text-red-500 text-xs font-medium">{duplicateWeightError}</p>
-        )}
-
-        <button
-          type="button"
-          onClick={addBagRow}
-          className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-        >
-          <Plus size={16} />
-          Agregar bolsa
-        </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Margen (%)"
+              title="Margen % (solo cálculo, no se guarda)"
+              value={row.marginPct ?? ''}
+              onChange={(e) => updateBagRow('marginPct', e.target.value)}
+              className="w-28 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
+            />
+            <button
+              type="button"
+              onClick={calcBagPrice}
+              title="Precio = costo × (1 + margen/100). El precio sigue siendo editable."
+              className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <Calculator size={13} />
+              Calcular precio
+            </button>
+          </div>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">
+              Bolsa abierta (kg restantes){' '}
+              <span className="font-normal text-slate-400 dark:text-slate-500">(opcional)</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Ej. 4.5"
+              title="Kg que quedan en la bolsa físicamente abierta"
+              value={row.openBagRemainingKg ?? ''}
+              onChange={(e) => updateBagRow('openBagRemainingKg', e.target.value)}
+              className="w-full max-w-[220px] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              Dejalo vacío si no hay bolsa abierta.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Sección Venta por Kilo */}
@@ -416,6 +369,9 @@ export const ProductPresentationsSection = ({
         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <Scale size={16} /> Venta por Kilo
         </label>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Definí cómo se ofrece el kilo suelto en la tienda online.
+        </p>
 
         <div className="flex items-center gap-3">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -484,31 +440,16 @@ export const ProductPresentationsSection = ({
                 <Calculator size={13} />
                 Calcular desde costo/kg
               </button>
-              {bagsWithCost.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <span>o desde bolsa:</span>
-                  <select
-                    value={kiloSourceBagId}
-                    onChange={(e) => setKiloSourceBagId(e.target.value)}
-                    className="px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Elegir bolsa…</option>
-                    {bagsWithCost.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.weightKg}kg · costo ${b.cost}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={calcKiloPriceFromSelectedBag}
-                    title="Precio/kg = (costo bolsa × (1 + margen/100)) / peso kg. El precio sigue siendo editable."
-                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                  >
-                    <Calculator size={13} />
-                    Prorratear
-                  </button>
-                </div>
+              {bagHasCost && (
+                <button
+                  type="button"
+                  onClick={calcKiloPriceFromBagCost}
+                  title="Precio/kg = (costo bolsa × (1 + margen/100)) / peso kg. El precio sigue siendo editable."
+                  className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                >
+                  <Calculator size={13} />
+                  Prorratear desde bolsa
+                </button>
               )}
             </div>
           </div>
@@ -533,27 +474,30 @@ const normalizeOpenBag = (value: number | null | undefined): number | null => {
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 
-// Función helper para construir el payload de presentations
+// Construye el payload de presentations desde la bolsa ÚNICA del formulario.
+// El backend requiere un array: se serializa como máx 1 bag + 0/1 kilo.
+// Las filas incompletas (sin peso o precio) se filtran y no viajan.
 export const buildPresentationsPayload = (
-  bagRows: PresentationRow[],
+  bagRow: PresentationRow | null | undefined,
   kiloEnabled: boolean,
   kiloPrice: number | null,
   kiloCost: number | null = null,
 ): ProductPresentation[] => {
-  // Filtrar filas incompletas (sin peso o precio) y convertir a números.
   // openBagRemainingKg solo viaja explícito cuando hay un valor >= 0.
-  const bags: ProductPresentation[] = bagRows
-    .filter((r) => r.weightKg && r.weightKg > 0 && r.price && r.price > 0)
-    .map((r) => {
-      const openBag = normalizeOpenBag(r.openBagRemainingKg);
-      return {
-        type: 'bag' as PresentationType,
-        weightKg: Number(r.weightKg), // ← convertir a número
-        price: Number(r.price), // ← convertir a número
-        cost: normalizeCost(r.cost),
-        ...(openBag !== null ? { openBagRemainingKg: openBag } : {}),
-      };
-    });
+  const bags: ProductPresentation[] =
+    bagRow && bagRow.weightKg && bagRow.weightKg > 0 && bagRow.price && bagRow.price > 0
+      ? [
+          {
+            type: 'bag' as PresentationType,
+            weightKg: Number(bagRow.weightKg),
+            price: Number(bagRow.price),
+            cost: normalizeCost(bagRow.cost),
+            ...(normalizeOpenBag(bagRow.openBagRemainingKg) !== null
+              ? { openBagRemainingKg: normalizeOpenBag(bagRow.openBagRemainingKg) as number }
+              : {}),
+          },
+        ]
+      : [];
 
   const kilo: ProductPresentation[] =
     kiloEnabled && kiloPrice && kiloPrice > 0
@@ -561,7 +505,7 @@ export const buildPresentationsPayload = (
           {
             type: 'kilo' as PresentationType,
             weightKg: null,
-            price: Number(kiloPrice), // ← convertir a número
+            price: Number(kiloPrice),
             cost: normalizeCost(kiloCost),
           },
         ]

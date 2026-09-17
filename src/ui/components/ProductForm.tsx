@@ -91,14 +91,12 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
   const [isBrandsLoading, setIsBrandsLoading] = useState(true);
 
   const [presentationsData, setPresentationsData] = useState<{
-    bagRows: PresentationRow[];
+    bagRow: PresentationRow | null;
     kiloEnabled: boolean;
     kiloPrice: number | null;
     kiloCost: number | null;
   }>({
-    bagRows: [
-      { id: crypto.randomUUID(), weightKg: null, price: null, cost: null, marginPct: null, openBagRemainingKg: null },
-    ],
+    bagRow: null,
     kiloEnabled: false,
     kiloPrice: null,
     kiloCost: null,
@@ -264,23 +262,15 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
   const onSubmit = async (data: ProductFormValues) => {
     setIsLoading(true);
     try {
-      // Construir presentations desde los datos del componente
+      // Construir presentations desde la bolsa única + kilo opcional
       const presentations = buildPresentationsPayload(
-        presentationsData.bagRows,
+        presentationsData.bagRow,
         presentationsData.kiloEnabled,
         presentationsData.kiloPrice,
         presentationsData.kiloCost,
       );
 
       // Validaciones adicionales
-      const weights = presentationsData.bagRows
-        .map((r) => r.weightKg)
-        .filter((w) => w !== null && w > 0);
-      if (weights.length !== new Set(weights).size) {
-        toast.error('No puedes tener dos bolsas con el mismo peso');
-        setIsLoading(false);
-        return;
-      }
 
       if (
         presentationsData.kiloEnabled &&
