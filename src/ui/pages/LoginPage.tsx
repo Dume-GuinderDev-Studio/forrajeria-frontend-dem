@@ -35,7 +35,7 @@ export const LoginPage = () => {
     const apiUrl =
       import.meta.env.NEXT_PUBLIC_API_URL ||
       import.meta.env.VITE_API_URL ||
-      'https://backend-bas.onrender.com/api';
+      'https://forrajeria-backend-dem.onrender.com/api';
     window.location.href = `${apiUrl}/auth/google`;
   };
 
@@ -60,7 +60,8 @@ export const LoginPage = () => {
         data.token,
       );
 
-      const destination = data.user.role === 'empleado' ? '/empleado/dashboard' : '/admin/dashboard';
+      const destination =
+        data.user.role === 'empleado' ? '/empleado/dashboard' : '/admin/dashboard';
       navigate(destination, { replace: true });
     } catch (err) {
       if (isAxiosError(err)) {
@@ -87,14 +88,7 @@ export const LoginPage = () => {
           {/* Logo Section */}
           <div className="mb-6">
             <div className="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mb-2 overflow-hidden mx-auto border-4 border-blue-100">
-              <img
-                src="/logo.png"
-                alt="BAS Logo"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              PetShop
             </div>
             <h1 className="text-2xl font-bold text-slate-800">BAS Pet Shop</h1>
             <p className="text-blue-600 font-medium italic">"Tu mascota feliz"</p>
