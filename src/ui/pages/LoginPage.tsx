@@ -90,7 +90,7 @@ export const LoginPage = () => {
             <div className="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mb-2 overflow-hidden mx-auto border-4 border-blue-100">
               PetShop
             </div>
-            <h1 className="text-2xl font-bold text-slate-800">BAS Pet Shop</h1>
+            <h1 className="text-2xl font-bold text-slate-800">Pet Shop</h1>
             <p className="text-blue-600 font-medium italic">"Tu mascota feliz"</p>
           </div>
 
