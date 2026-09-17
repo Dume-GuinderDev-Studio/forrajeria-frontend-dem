@@ -18,7 +18,7 @@ export const Footer = () => {
                 Pet Shop
               </div>
               <div>
-                <h3 className="text-xl font-bold">BAS Pet Shop</h3>
+                <h3 className="text-xl font-bold">Pet Shop</h3>
                 <p className="text-slate-400 text-sm italic">"Tu mascota feliz"</p>
               </div>
             </div>

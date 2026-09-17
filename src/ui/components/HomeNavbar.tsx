@@ -18,7 +18,7 @@ export const HomeNavbar = ({ onOpenCart }: HomeNavbarProps) => {
             PetShop
           </div>
           <div className="flex flex-col">
-            <h1 className="text-xl md:text-2xl font-bold text-white leading-tight">BAS Pet Shop</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-white leading-tight">Pet Shop</h1>
             <p className="text-xs md:text-sm text-blue-100 italic font-medium">
               "Tu mascota feliz"
             </p>
