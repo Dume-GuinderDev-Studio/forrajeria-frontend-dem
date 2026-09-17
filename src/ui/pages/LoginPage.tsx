@@ -304,7 +304,7 @@ export const LoginPage = () => {
           </div>
 
           <div className="mt-6 text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} Sistema de Gestión BAS
+            &copy; {new Date().getFullYear()} Sistema de Gestión
           </div>
         </div>
       </div>

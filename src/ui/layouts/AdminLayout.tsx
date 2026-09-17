@@ -27,7 +27,7 @@ export const AdminLayout = () => {
             />
           </div>
           <span className="font-bold text-xl text-slate-800 dark:text-white tracking-tight">
-            BAS <span className="text-blue-600">Admin</span>
+            <span className="text-blue-600">Admin</span>
           </span>
         </div>
 
