@@ -15,14 +15,7 @@ export const HomeNavbar = ({ onOpenCart }: HomeNavbarProps) => {
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 border-2 border-blue-400">
-            <img
-              src="/logo.png"
-              alt="BAS"
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            PetShop
           </div>
           <div className="flex flex-col">
             <h1 className="text-xl md:text-2xl font-bold text-white leading-tight">BAS Pet Shop</h1>
