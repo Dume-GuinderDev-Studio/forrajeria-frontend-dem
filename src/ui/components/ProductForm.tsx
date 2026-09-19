@@ -353,7 +353,7 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
   const selectedCategoryId = watch('categoryId');
   const selectedCategoryObj = visibleCategories.find((cat) => cat.id === selectedCategoryId);
   const selectedCategoryName = selectedCategoryObj?.name?.toUpperCase() || '';
-  const showAdvancedFields = !['OTROS', 'HIGIENE', 'ACCESORIOS'].some((cat) =>
+  const showLifeStage = !['OTROS', 'HIGIENE', 'ACCESORIOS'].some((cat) =>
     selectedCategoryName.includes(cat),
   );
 
@@ -413,7 +413,7 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
             )}
           </div>
 
-          {showAdvancedFields && (
+          {showLifeStage && (
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                 <Tag size={16} /> Etapa de Vida
@@ -568,13 +568,11 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
           />
         </div>
 
-        {/* Presentaciones - Solo mostrar para categorías avanzadas */}
-        {showAdvancedFields && (
-          <ProductPresentationsSection
-            product={product}
-            onPresentationsChange={setPresentationsData}
-          />
-        )}
+        {/* Presentaciones */}
+        <ProductPresentationsSection
+          product={product}
+          onPresentationsChange={setPresentationsData}
+        />
 
         {/* URL Imagen */}
         <div className="space-y-2">
