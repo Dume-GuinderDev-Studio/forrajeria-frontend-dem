@@ -22,7 +22,6 @@ import {
 } from '@/ui/components/ui/table';
 import { getProfitBySupplier, type SupplierProfit } from '@/infrastructure/orders.service';
 import { getSuppliers, type Supplier } from '@/infrastructure/suppliers.service';
-import { getSupplierDebts, type SupplierDebt } from '@/infrastructure/supplier-debts.service';
 import { formatARS } from '@/lib/format';
 import { CopyAmountButton } from '@/ui/components/CopyAmountButton';
 import {
@@ -38,28 +37,22 @@ export const calcPayableToSupplier = (sales: number, profit: number): number =>
   (Number(sales) || 0) - (Number(profit) || 0);
 
 /**
- * Descripción determinística con la que se registra la deuda de una fila
- * (codifica el rango exacto del período). Es la misma que se pre-carga en
- * el modal de Nueva deuda y la que se usa para detectar duplicados.
+ * Lo que falta registrar para una fila, leído directo del backend.
+ * Con fallback a venta − ganancia cuando el campo aún no viene.
  */
-export const buildPayableDebtDescription = (
-  supplierName: string,
-  from: string,
-  to: string,
-): string => `Saldo ${supplierName} (${from} al ${to})`;
+export const getPendingToRegister = (row: SupplierProfit): number => {
+  const pending = Number(row.pendingToRegister);
+  if (Number.isFinite(pending)) return pending;
+  return calcPayableToSupplier(row.sales, row.profit);
+};
 
 /**
- * Criterio de duplicado: mismo proveedor (supplierId) + descripción/rango
- * exacto. Cada combinación proveedor+rango es un caso válido independiente
- * (el usuario puede revisar rangos diarios o más largos).
+ * Lo ya registrado para una fila, leído directo del backend.
  */
-export const isPayableDebtRegistered = (
-  debts: SupplierDebt[],
-  supplierId: string,
-  description: string,
-): boolean =>
-  supplierId !== '' &&
-  debts.some((debt) => debt.supplierId === supplierId && debt.description === description);
+export const getAlreadyRegistered = (row: SupplierProfit): number => {
+  const already = Number(row.alreadyRegistered ?? 0);
+  return Number.isFinite(already) ? already : 0;
+};
 
 const toISODate = (date: Date): string => {
   const year = date.getFullYear();
@@ -78,7 +71,6 @@ export const SupplierProfitPage = () => {
   const [to, setTo] = useState(() => toISODate(new Date()));
   const [rows, setRows] = useState<SupplierProfit[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [debts, setDebts] = useState<SupplierDebt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [debtInitials, setDebtInitials] = useState<SupplierDebtInitials | null>(null);
@@ -88,17 +80,14 @@ export const SupplierProfitPage = () => {
     setError('');
 
     try {
-      const [profitData, suppliersData, debtsData] = await Promise.all([
+      const [profitData, suppliersData] = await Promise.all([
         getProfitBySupplier({ from: from || undefined, to: to || undefined }),
         getSuppliers(),
-        getSupplierDebts(),
       ]);
       setRows(profitData);
       setSuppliers(suppliersData.filter((supplier) => supplier.isActive !== false));
-      setDebts(debtsData);
     } catch {
       setRows([]);
-      setDebts([]);
       setError('No se pudo cargar la rendición por proveedor. Revisá tu conexión e intentá nuevamente.');
     } finally {
       setLoading(false);
@@ -112,7 +101,8 @@ export const SupplierProfitPage = () => {
   const totals = useMemo(() => {
     const sales = rows.reduce((sum, row) => sum + (Number(row.sales) || 0), 0);
     const profit = rows.reduce((sum, row) => sum + (Number(row.profit) || 0), 0);
-    return { sales, profit, payable: calcPayableToSupplier(sales, profit) };
+    const pending = rows.reduce((sum, row) => sum + getPendingToRegister(row), 0);
+    return { sales, profit, payable: pending };
   }, [rows]);
 
   // Resuelve el supplierId real de la fila (por id, con fallback por nombre).
@@ -122,25 +112,15 @@ export const SupplierProfitPage = () => {
       : (suppliers.find((supplier) => supplier.name === row.supplierName)?.id ?? '');
 
   // Abre el modal de Nueva deuda pre-cargado con el proveedor de la fila y
-  // el monto a pagar calculado. El usuario revisa y confirma en el formulario.
+  // lo que falta registrar (pendingToRegister). El usuario revisa y confirma.
   const openDebtForRow = (row: SupplierProfit) => {
-    const payable = calcPayableToSupplier(row.sales, row.profit);
+    const pending = getPendingToRegister(row);
     setDebtInitials({
       supplierId: resolveRowSupplierId(row),
-      description: buildPayableDebtDescription(row.supplierName, from, to),
-      totalAmount: String(payable),
+      description: `Saldo ${row.supplierName} (${from} al ${to})`,
+      totalAmount: String(pending),
     });
   };
-
-  // Refresca solo las deudas (sin spinner de página) tras crear una desde
-  // esta vista, para que el estado "Ya registrada" se actualice al volver.
-  const refreshDebts = useCallback(async () => {
-    try {
-      setDebts(await getSupplierDebts());
-    } catch {
-      // Se reintentará en la próxima carga de la página.
-    }
-  }, []);
 
   return (
     <div className="flex bg-slate-50 dark:bg-slate-900 min-h-screen font-sans">
@@ -279,13 +259,9 @@ export const SupplierProfitPage = () => {
                 </TableHeader>
                 <TableBody>
                   {rows.map((row) => {
-                    const payable = calcPayableToSupplier(row.sales, row.profit);
-                    const supplierId = resolveRowSupplierId(row);
-                    const alreadyRegistered = isPayableDebtRegistered(
-                      debts,
-                      supplierId,
-                      buildPayableDebtDescription(row.supplierName, from, to),
-                    );
+                    const pending = getPendingToRegister(row);
+                    const already = getAlreadyRegistered(row);
+                    const isFullyRegistered = pending === 0;
                     return (
                       <TableRow key={row.supplierId || row.supplierName}>
                         <TableCell className="font-medium text-slate-800 dark:text-slate-200">
@@ -297,29 +273,24 @@ export const SupplierProfitPage = () => {
                         </TableCell>
                         <TableCell className="text-right font-semibold">
                           <span className="inline-flex items-center justify-end gap-1">
-                            {formatARS(payable)}
+                            {formatARS(pending)}
                             <CopyAmountButton
-                              value={formatARS(payable)}
+                              value={formatARS(pending)}
                               label={`Copiar monto a pagar a ${row.supplierName}`}
                             />
                           </span>
+                          {already > 0 && (
+                            <span className="block text-xs font-normal text-slate-500 dark:text-slate-400">
+                              {`Ya registrado: ${formatARS(already)}`}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
-                          {alreadyRegistered ? (
-                            <span className="inline-flex items-center justify-end gap-2">
-                              <Button variant="outline" size="sm" disabled>
-                                <Check className="size-4 text-emerald-600" />
-                                Ya registrada
-                              </Button>
-                              <button
-                                type="button"
-                                onClick={() => openDebtForRow(row)}
-                                title="Registrar otra deuda para este mismo rango"
-                                className="text-xs font-medium text-slate-500 dark:text-slate-400 underline decoration-dotted underline-offset-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                              >
-                                Registrar igual
-                              </button>
-                            </span>
+                          {isFullyRegistered ? (
+                            <Button variant="outline" size="sm" disabled>
+                              <Check className="size-4 text-emerald-600" />
+                              Todo registrado
+                            </Button>
                           ) : (
                             <Button
                               variant="outline"
@@ -357,7 +328,7 @@ export const SupplierProfitPage = () => {
         }}
         suppliers={suppliers}
         initials={debtInitials ?? undefined}
-        onCreated={refreshDebts}
+        onCreated={loadProfit}
       />
     </div>
   );

@@ -160,6 +160,10 @@ export interface SupplierProfit {
   sales: number;
   profit: number;
   orders?: number;
+  /** Monto ya registrado como deuda para el período (viene del backend). */
+  alreadyRegistered: number;
+  /** Lo que falta registrar para el período (viene del backend). */
+  pendingToRegister: number;
 }
 
 interface SupplierProfitRaw {
@@ -175,6 +179,8 @@ interface SupplierProfitRaw {
   profit?: number;
   gain?: number;
   orders?: number;
+  alreadyRegistered?: number;
+  pendingToRegister?: number;
 }
 
 type ProfitBySupplierResponse =
@@ -187,6 +193,10 @@ const normalizeSupplierProfit = (raw: SupplierProfit | SupplierProfitRaw): Suppl
   const nested = typeof record.supplier === 'object' ? record.supplier : undefined;
   const sales = Number(record.totalSales ?? record.sales ?? record.total ?? record.revenue ?? 0);
   const profit = Number(record.totalProfit ?? record.profit ?? record.gain ?? 0);
+  const alreadyRegistered = Number(record.alreadyRegistered ?? 0);
+  const pendingRaw = record.pendingToRegister;
+  const pendingFallback = (Number.isFinite(sales) ? sales : 0) - (Number.isFinite(profit) ? profit : 0);
+  const pendingToRegister = Number(pendingRaw ?? pendingFallback);
   return {
     supplierId: record.supplierId ?? nested?.id ?? record.supplierName ?? '',
     supplierName:
@@ -197,6 +207,8 @@ const normalizeSupplierProfit = (raw: SupplierProfit | SupplierProfitRaw): Suppl
     sales: Number.isFinite(sales) ? sales : 0,
     profit: Number.isFinite(profit) ? profit : 0,
     orders: typeof record.orders === 'number' ? record.orders : undefined,
+    alreadyRegistered: Number.isFinite(alreadyRegistered) ? alreadyRegistered : 0,
+    pendingToRegister: Number.isFinite(pendingToRegister) ? pendingToRegister : 0,
   };
 };
 
