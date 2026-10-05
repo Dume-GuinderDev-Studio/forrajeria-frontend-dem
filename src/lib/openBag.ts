@@ -61,5 +61,5 @@ export const formatKg = (kg: number): string => {
 export const getOpenBagLabel = (product: Product | null | undefined): string | null => {
   const remaining = getOpenBagRemainingKg(product);
   if (remaining === null) return null;
-  return `Bolsa abierta: ${formatKg(remaining)}kg restantes`;
+  return `Sobrante abierto: ${formatKg(remaining)} kg`;
 };

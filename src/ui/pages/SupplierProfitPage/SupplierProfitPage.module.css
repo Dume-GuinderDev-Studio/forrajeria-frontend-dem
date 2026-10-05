@@ -1,0 +1,566 @@
+.root {
+  display: flex;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+:global(.dark) .root {
+  background-color: #0f172a;
+}
+
+.main {
+  flex: 1;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1rem;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .main {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 5rem;
+  }
+}
+
+.inner {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .title {
+  color: #fff;
+}
+
+.subtitle {
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+:global(.dark) .subtitle {
+  color: #94a3b8;
+}
+
+.refreshIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.refreshIcon[data-spin='true'] {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:global(.dark) .stat {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.statRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.statBody {
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+:global(.dark) .statLabel {
+  color: #94a3b8;
+}
+
+.statValue {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .statValue {
+  color: #fff;
+}
+
+.statIcon {
+  flex-shrink: 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.statIconBlue {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.statIconGreen {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.filters {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .filters {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+:global(.dark) .filters {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dateField {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+@media (min-width: 640px) {
+  .dateField {
+    width: 14rem;
+  }
+}
+
+.dateLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:global(.dark) .dateLabel {
+  color: #94a3b8;
+}
+
+.dateIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dateInput {
+  width: 100%;
+  height: 2.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1e293b;
+}
+
+.dateInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+:global(.dark) .dateInput {
+  border-color: #475569;
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  color: #94a3b8;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+
+:global(.dark) .stateBox {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.stateBoxError {
+  border-color: #fecaca;
+}
+
+:global(.dark) .stateBoxError {
+  border-color: rgb(127 29 29 / 0.4);
+}
+
+.stateIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.stateIconSpin {
+  animation: spin 1s linear infinite;
+  color: #2563eb;
+}
+
+.stateIconRed {
+  color: #ef4444;
+}
+
+.stateError {
+  color: #334155;
+  font-weight: 500;
+}
+
+:global(.dark) .stateError {
+  color: #cbd5e1;
+}
+
+.retryBtn {
+  margin-top: 1rem;
+}
+
+.tableWrap {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+:global(.dark) .tableWrap {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.cellName {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+:global(.dark) .cellName {
+  color: #e2e8f0;
+}
+
+.cellRight {
+  text-align: right;
+}
+
+/* Etiqueta de la fila sin proveedor: no es un botón, es la explicación de por
+   qué esa fila no tiene acciones. */
+.sinProveedor {
+  display: inline-block;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #94a3b8;
+}
+
+:global(.dark) .sinProveedor {
+  color: #64748b;
+}
+
+.cellProfit {
+  text-align: right;
+  font-weight: 600;
+  color: #059669;
+}
+
+:global(.dark) .cellProfit {
+  color: #34d399;
+}
+
+.cellPayable {
+  text-align: right;
+  font-weight: 600;
+}
+
+.payableInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.registeredInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.checkIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #059669;
+}
+
+.registerAnyway {
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:global(.dark) .registerAnyway {
+  color: #94a3b8;
+}
+
+.registerAnyway:hover {
+  color: #2563eb;
+}
+
+:global(.dark) .registerAnyway:hover {
+  color: #60a5fa;
+}
+
+.totalRow {
+  background-color: #f8fafc;
+  font-weight: 600;
+}
+
+:global(.dark) .totalRow {
+  background-color: rgb(15 23 42 / 0.5);
+}
+
+.totalName {
+  color: #1e293b;
+}
+
+:global(.dark) .totalName {
+  color: #e2e8f0;
+}
+
+.totalProfit {
+  text-align: right;
+  color: #059669;
+}
+
+:global(.dark) .totalProfit {
+  color: #34d399;
+}
+
+/*
+ * Igual que en el resto del admin: un max-width sobre el <td> no acorta
+ * nada, porque las celdas de shadcn traen `whitespace-nowrap` y el
+ * min-content del texto gana. El tope real va sobre un contenedor interno.
+ */
+/*
+ * La tabla tiene 5 columnas y con el padding por defecto de TableCell (p-3)
+ * no entra a 1024px. Se aprieta el padding horizontal desde aca, sin tocar el
+ * componente compartido ui/table.tsx.
+ */
+.tableWrap th,
+.tableWrap td {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.cellNameText {
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile: una card por proveedor en lugar de la tabla                */
+/* ------------------------------------------------------------------ */
+
+.tableDesktop {
+  display: block;
+}
+
+.cardList {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 1023px) {
+  .cardList {
+    display: block;
+  }
+
+  .tableDesktop {
+    display: none;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.card:last-child {
+  border-bottom: 0;
+}
+
+:global(.dark) .card {
+  border-bottom-color: #334155;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.cardName {
+  min-width: 0;
+  flex: 1;
+  font-weight: 500;
+  color: #1e293b;
+  overflow-wrap: anywhere;
+}
+
+:global(.dark) .cardName {
+  color: #e2e8f0;
+}
+
+.cardActions {
+  flex-shrink: 0;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #475569;
+}
+
+:global(.dark) .cardMeta {
+  color: #cbd5e1;
+}
+
+.cardMetric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+}
+
+.cardPayable {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+:global(.dark) .cardPayable {
+  color: #f8fafc;
+}
+
+.cardLabel {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cardTotalRow {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+:global(.dark) .cardTotalRow {
+  color: #f8fafc;
+}

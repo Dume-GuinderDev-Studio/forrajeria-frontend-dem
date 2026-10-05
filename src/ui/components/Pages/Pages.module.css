@@ -1,0 +1,354 @@
+.root {
+  display: flex;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+:global(.dark) .root {
+  background-color: #0f172a;
+}
+
+.main {
+  flex: 1;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1rem;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .main {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main {
+    margin-left: 5rem;
+  }
+}
+
+.inner {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .title {
+  color: #fff;
+}
+
+.subtitle {
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+:global(.dark) .subtitle {
+  color: #94a3b8;
+}
+
+.headerActions {
+  display: grid;
+  /* Mobile: el primario ocupa la fila entera arriba y los CSV se reparten
+     media columna cada uno abajo. minmax(0, 1fr) en vez de 1fr para que la
+     columna pueda bajar del min-content si la etiqueta creciera: con
+     `white-space: nowrap`, `1fr` (= minmax(auto, 1fr)) queda pegada al ancho
+     del texto y el botón se sale de la columna. Hoy no hace falta porque las
+     etiquetas entran de sobra, es una red de seguridad. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .headerActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toolBtn:hover {
+  background-color: #f8fafc;
+}
+
+:global(.dark) .toolBtn {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+:global(.dark) .toolBtn:hover {
+  background-color: #334155;
+}
+
+.toolBtnLabel {
+  /* Visible siempre: en mobile los botones pasaban a ser íconos sueltos e
+     indistinguibles. Antes se ocultaba bajo 640px; esa regla se saco porque
+     .toolBtnLabel solo la usan los tres botones de este encabezado. */
+  white-space: nowrap;
+}
+
+/* Botón primario del encabezado: mismo azul, borde y radio que usaba el botón
+   del sidebar (#2563eb / hover #1d4ed8 / radius 0.75rem), para que al moverlo
+   de lugar se vea igual. Los CSV siguen con .toolBtn como secundarios. */
+.primaryToolBtn {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.primaryToolBtn:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.2);
+}
+
+/* En dark el azul se mantiene: es el mismo color que ya se veía en el sidebar,
+   así que no necesita variante propia. */
+:global(.dark) .primaryToolBtn {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+:global(.dark) .primaryToolBtn:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+/* --- Mobile (<768px) --- */
+@media (max-width: 767px) {
+  /* Área táctil: los tres botones quedan por encima de los 44px. */
+  .toolBtn,
+  .primaryToolBtn {
+    min-height: 44px;
+    justify-content: center;
+    /* Sin esto "Exportar CSV" se parte en dos líneas dentro del 50% de ancho. */
+    white-space: nowrap;
+  }
+
+  /* Padding horizontal y tipografía ajustados para que la etiqueta completa
+     entre en media columna a 360px sin recortarse ni partirse. */
+  .toolBtn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .primaryToolBtn {
+    /* Fila completa, arriba del todo. */
+    grid-column: 1 / -1;
+  }
+}
+
+/* --- Desktop (>=768px): el primario se mantiene a la derecha, como estaba --- */
+@media (min-width: 768px) {
+  .primaryToolBtn {
+    order: 3;
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  color: #94a3b8;
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+  color: #2563eb;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressText {
+  font-weight: 500;
+  color: #475569;
+}
+
+:global(.dark) .progressText {
+  color: #cbd5e1;
+}
+
+.progressTrack {
+  width: 16rem;
+  height: 0.5rem;
+  margin-top: 1rem;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  overflow: hidden;
+}
+
+:global(.dark) .progressTrack {
+  background-color: #334155;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 9999px;
+  background-color: #2563eb;
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawerContent {
+  width: 100%;
+  overflow-y: auto;
+  background-color: #f8fafc;
+  padding: 0;
+  border-left: 1px solid #e2e8f0;
+}
+
+@media (min-width: 640px) {
+  .drawerContent {
+    max-width: 36rem;
+  }
+}
+
+:global(.dark) .drawerContent {
+  background-color: #0f172a;
+  border-left-color: #1e293b;
+}
+
+.drawerHeader {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:global(.dark) .drawerHeader {
+  border-bottom-color: #1e293b;
+  background-color: #0f172a;
+}
+
+.drawerHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawerHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.backBtn {
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backBtn:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+
+:global(.dark) .backBtn:hover {
+  color: #fff;
+  background-color: #1e293b;
+}
+
+.drawerTitle {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+}
+
+.closeBtn {
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.closeBtn:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+:global(.dark) .closeBtn:hover {
+  background-color: rgb(127 29 29 / 0.2);
+}
+
+.drawerBody {
+  padding: 1.5rem;
+}

@@ -1,0 +1,212 @@
+.root {
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+:global(.dark) .root {
+  background-color: #0f172a;
+}
+
+.nav {
+  height: 4rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+@media (min-width: 640px) {
+  .nav {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+:global(.dark) .nav {
+  background-color: #1e293b;
+  border-bottom-color: #334155;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoBox {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: #d1fae5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #a7f3d0;
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logoBox.logoFallback::after {
+  content: 'B';
+  color: #047857;
+  font-weight: 700;
+}
+
+.brandName {
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: #1e293b;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .brandName {
+  color: #fff;
+}
+
+.brandAccent {
+  color: #059669;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userMeta {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .userMeta {
+    display: flex;
+  }
+}
+
+.userName {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+:global(.dark) .userName {
+  color: #e2e8f0;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #64748b;
+}
+
+:global(.dark) .userEmail {
+  color: #94a3b8;
+}
+
+.avatar {
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.divider {
+  height: 1.5rem;
+  width: 1px;
+  background-color: #cbd5e1;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+:global(.dark) .divider {
+  background-color: #475569;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #475569;
+  border: 0;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:global(.dark) .logoutBtn {
+  color: #cbd5e1;
+}
+
+.logoutBtn:hover {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+:global(.dark) .logoutBtn:hover {
+  color: #ef4444;
+  background-color: rgb(127 29 29 / 0.2);
+}
+
+.logoutLabel {
+  display: none;
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .logoutLabel {
+    display: inline;
+  }
+}
+
+.main {
+  padding: 1rem;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .main {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 16rem;
+  }
+}

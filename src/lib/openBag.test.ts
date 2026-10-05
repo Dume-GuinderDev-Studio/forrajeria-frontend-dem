@@ -153,7 +153,7 @@ describe('formatKg', () => {
 
 describe('getOpenBagLabel', () => {
   it('arma la etiqueta completa', () => {
-    expect(getOpenBagLabel(makeProduct())).toBe('Bolsa abierta: 7kg restantes');
+    expect(getOpenBagLabel(makeProduct())).toBe('Sobrante abierto: 7 kg');
   });
 
   it('muestra el badge para el caso real: bag de 15kg con 10kg restantes y kilo activa', () => {
@@ -166,7 +166,17 @@ describe('getOpenBagLabel', () => {
           ],
         }),
       ),
-    ).toBe('Bolsa abierta: 10kg restantes');
+    ).toBe('Sobrante abierto: 10 kg');
+  });
+
+  it('usa punto decimal para los kilos fraccionarios', () => {
+    expect(
+      getOpenBagLabel(
+        makeProduct({
+          presentations: [kiloPresentation(), bagPresentation({ openBagRemainingKg: 7.5 })],
+        }),
+      ),
+    ).toBe('Sobrante abierto: 7.5 kg');
   });
 
   it('devuelve null cuando no hay bolsa abierta', () => {

@@ -1,0 +1,489 @@
+.root {
+  display: flex;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+:global(.dark) .root {
+  background-color: #0f172a;
+}
+
+.main {
+  flex: 1;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1rem;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .main {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 5rem;
+  }
+}
+
+.inner {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .title {
+  color: #fff;
+}
+
+.subtitle {
+  color: #64748b !important;
+  margin-top: 0.25rem;
+}
+
+:global(.dark) .subtitle {
+  color: #64748b !important;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:global(.dark) .card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.cardRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardBody {
+  min-width: 0;
+}
+
+.cardTitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+:global(.dark) .cardTitle {
+  color: #47596b;
+}
+
+.cardValue {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .cardValue {
+  color: #fff;
+}
+
+.cardSub {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #47596b;
+}
+
+.iconBox {
+  flex-shrink: 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.iconBox[data-accent='chart1'] {
+  background-color: color-mix(in oklab, var(--chart-1) 15%, transparent);
+  color: var(--chart-1);
+}
+
+.iconBox[data-accent='chart2'] {
+  background-color: color-mix(in oklab, var(--chart-2) 15%, transparent);
+  color: var(--chart-2);
+}
+
+.iconBox[data-accent='chart3'] {
+  background-color: color-mix(in oklab, var(--chart-3) 15%, transparent);
+  color: var(--chart-3);
+}
+
+.iconBox[data-accent='chart4'] {
+  background-color: color-mix(in oklab, var(--chart-4) 15%, transparent);
+  color: var(--chart-4);
+}
+
+.iconBox[data-accent='chart5'] {
+  background-color: color-mix(in oklab, var(--chart-5) 15%, transparent);
+  color: var(--chart-5);
+}
+
+.skeleton {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:global(.dark) .skeleton {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.bar {
+  border-radius: 0.25rem;
+  background-color: #e2e8f0;
+}
+
+:global(.dark) .bar {
+  background-color: #334155;
+}
+
+.barTitle {
+  height: 1rem;
+  width: 7rem;
+  margin-bottom: 0.75rem;
+}
+
+.barValue {
+  height: 2rem;
+  width: 9rem;
+  margin-bottom: 0.5rem;
+}
+
+.barSub {
+  height: 0.75rem;
+  width: 5rem;
+  background-color: #f1f5f9;
+}
+
+:global(.dark) .barSub {
+  background-color: rgb(51 65 85 / 0.6);
+}
+
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #fecaca;
+}
+
+:global(.dark) .stateBox {
+  background-color: #1e293b;
+  border-color: rgb(127 29 29 / 0.4);
+}
+
+.stateIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.stateError {
+  color: #334155;
+  font-weight: 500;
+}
+
+:global(.dark) .stateError {
+  color: #cbd5e1;
+}
+
+.retryBtn {
+  margin-top: 1rem;
+}
+
+.retryIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.alerts {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+:global(.dark) .alerts {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.alertsHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+:global(.dark) .alertsHead {
+  border-bottom-color: #334155;
+}
+
+.alertsHeadIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #f59e0b;
+}
+
+.alertsTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+:global(.dark) .alertsTitle {
+  color: #fff;
+}
+
+.alertsSkeleton {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.alertsSkeletonBar {
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  background-color: #f1f5f9;
+}
+
+:global(.dark) .alertsSkeletonBar {
+  background-color: #334155;
+}
+
+.alertsEmpty {
+  padding: 1.25rem 2.5rem;
+  text-align: center;
+}
+
+.alertsEmptyText {
+  color: #475569;
+  font-weight: 500;
+}
+
+:global(.dark) .alertsEmptyText {
+  color: #cbd5e1;
+}
+
+.alertsList {
+  border-top: 0;
+}
+
+.alertsList > * + * {
+  border-top: 1px solid #e2e8f0;
+}
+
+:global(.dark) .alertsList > * + * {
+  border-top-color: #334155;
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1rem 1.25rem 0.25rem;
+}
+
+.groupHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.groupIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.groupIconRed {
+  color: #ef4444;
+}
+
+.groupIconAmber {
+  color: #f59e0b;
+}
+
+.groupTitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+:global(.dark) .groupTitle {
+  color: #fff;
+}
+
+.seeAll {
+  border: 0;
+  background-color: transparent;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+:global(.dark) .seeAll {
+  color: #60a5fa;
+}
+
+.seeAll:hover {
+  text-decoration: underline;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+/* Fila de la lista flex de mobile: foco visible para navegación por teclado. */
+.clickableItem:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+:global(.dark) .clickableItem:focus-visible {
+  outline-color: #60a5fa;
+}
+
+.productNameText {
+  color: #1e293b;
+}
+
+:global(.dark) .productNameText {
+  color: #e2e8f0;
+}
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+:global(.dark) .productCell {
+  color: #e2e8f0;
+}
+
+/*
+ * La celda de producto debe poder encogerse por debajo del ancho de su
+ * contenido: sobreescribe el `whitespace-nowrap` global de TableCell
+ * (shadcn) solo para esta columna.
+ */
+.cellProduct {
+  min-width: 0;
+  white-space: normal;
+}
+
+.productName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.rowIconRed {
+  color: #ef4444;
+}
+
+.rowIconAmber {
+  color: #f59e0b;
+}
+
+.cellRight {
+  text-align: right;
+}

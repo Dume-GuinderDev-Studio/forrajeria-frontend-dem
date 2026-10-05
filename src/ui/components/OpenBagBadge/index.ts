@@ -1,0 +1,1 @@
+export { OpenBagBadge } from './OpenBagBadge';

@@ -1,0 +1,1 @@
+export { CashRegisterPage } from './CashRegisterPage';

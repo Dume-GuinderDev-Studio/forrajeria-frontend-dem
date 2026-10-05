@@ -1,0 +1,188 @@
+.root {
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+:global(.dark) .title {
+  color: #fff;
+}
+
+.subtitle {
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+:global(.dark) .subtitle {
+  color: #94a3b8;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:global(.dark) .card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.bar {
+  height: 1rem;
+  border-radius: 0.25rem;
+  background-color: #e2e8f0;
+}
+
+:global(.dark) .bar {
+  background-color: #334155;
+}
+
+.barShort {
+  width: 11rem;
+}
+
+.barLong {
+  height: 2rem;
+  width: 16rem;
+}
+
+.barMid {
+  width: 8rem;
+  background-color: #f1f5f9;
+}
+
+:global(.dark) .barMid {
+  background-color: rgb(51 65 85 / 0.6);
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  text-align: center;
+}
+
+.errorIcon {
+  width: 2rem;
+  height: 2rem;
+  color: #ef4444;
+  margin-bottom: 0.75rem;
+}
+
+.errorText {
+  color: #334155;
+  font-weight: 500;
+}
+
+:global(.dark) .errorText {
+  color: #cbd5e1;
+}
+
+.retryBtn {
+  margin-top: 1rem;
+}
+
+.retryIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.iconBox {
+  flex-shrink: 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+:global(.dark) .iconBox {
+  background-color: rgb(6 78 59 / 0.4);
+  color: #6ee7b7;
+}
+
+.summaryBody {
+  min-width: 0;
+}
+
+.summaryText {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: #334155;
+}
+
+:global(.dark) .summaryText {
+  color: #e2e8f0;
+}
+
+.strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+:global(.dark) .strong {
+  color: #fff;
+}
+
+.summarySub {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.saleBtn {
+  width: 100%;
+  height: 5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.saleIcon {
+  width: 1.75rem;
+  height: 1.75rem;
+}

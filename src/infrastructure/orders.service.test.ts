@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, type Mock } from 'vitest';
-import { createManualOrder, confirmOrder, getMySalesToday } from './orders.service';
+import { createManualOrder, confirmOrder, getMySalesToday, getProfitBySupplier } from './orders.service';
 import api from './api';
 
 vi.mock('./api', () => ({
@@ -54,5 +54,54 @@ describe('orders.service', () => {
     const result = await getMySalesToday();
 
     expect(result).toEqual({ sales: 1500, orders: 2 });
+  });
+});
+
+describe('getProfitBySupplier (normalización de la fila)', () => {
+  const responder = (rows: unknown[]) => {
+    apiGet.mockResolvedValue({ data: rows });
+  };
+
+  it('deja supplierId en null para el bucket "Sin proveedor"', async () => {
+    // El backend manda supplierId: null para las ventas de productos sin marca.
+    // Antes caía en `?? record.supplierName` y quedaba supplierId = "Sin
+    // proveedor", un string truthy que hacía creer que había un proveedor real.
+    responder([
+      { supplierId: null, supplierName: 'Sin proveedor', totalSales: 12000, totalProfit: 3000 },
+    ]);
+
+    const [row] = await getProfitBySupplier();
+
+    expect(row.supplierId).toBeNull();
+    expect(row.supplierName).toBe('Sin proveedor');
+  });
+
+  it('conserva el supplierId real cuando viene', async () => {
+    responder([
+      { supplierId: 's1', supplierName: 'MAJANO', totalSales: 60000, totalProfit: 10000 },
+    ]);
+
+    const [row] = await getProfitBySupplier();
+
+    expect(row.supplierId).toBe('s1');
+  });
+
+  it('usa el id anidado cuando viene en supplier: { id }', async () => {
+    responder([
+      { supplier: { id: 's9', name: 'RUMA' }, totalSales: 100, totalProfit: 10 },
+    ]);
+
+    const [row] = await getProfitBySupplier();
+
+    expect(row.supplierId).toBe('s9');
+  });
+
+  it('deja payableAmount en undefined si el backend no lo manda', async () => {
+    // Es lo que hace caer a la vista al cálculo local venta − ganancia.
+    responder([{ supplierId: 's1', supplierName: 'MAJANO', totalSales: 60000, totalProfit: 10000 }]);
+
+    const [row] = await getProfitBySupplier();
+
+    expect(row.payableAmount).toBeUndefined();
   });
 });

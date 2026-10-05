@@ -12,6 +12,7 @@ SPA (Single Page Application) para el sistema de gestión de la forrajería BAS,
 - **shadcn/ui + Radix UI** — componentes accesibles
 - **Axios** — cliente HTTP
 - **React Router DOM 7** — navegación SPA
+- **reCAPTCHA v3** — protección del flujo de pedido por WhatsApp
 - **Sonner** — notificaciones toast
 - **Lucide React** — iconografía
 - **vite-plugin-pwa** — PWA (manifest + service worker)
@@ -76,10 +77,11 @@ src/
 - **Rutas protegidas**: `/admin/*` pasa por `ProtectedRoute`, que valida la sesión contra `GET /auth/me`.
 - El JWT se guarda en `localStorage` (zustand `persist`). ⚠️ Es un **trade-off documentado** en `auth_session_manager.ts`: el cierre ideal (cookie `httpOnly` con el JWT, no expuesto al JavaScript) requiere cambios en el **backend**, fuera de este repo.
 
-## 🛒 Pedido por WhatsApp
+## 🛒 Pedido por WhatsApp con reCAPTCHA v3
 
 1. El cliente arma el carrito y completa nombre y teléfono.
-2. Se llama a `POST /orders/whatsapp-link`; el backend valida el carrito y devuelve el link de WhatsApp.
+2. Al enviar, se obtiene un token de reCAPTCHA v3 (`getRecaptchaToken`).
+3. Se llama a `POST /orders/whatsapp-link` enviando el header `x-recaptcha-token`; el backend valida el carrito y el token, y devuelve el link de WhatsApp.
 4. Se abre WhatsApp con el detalle del pedido (nunca se arma el link a mano en el cliente).
 
 ## 📱 PWA

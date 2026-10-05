@@ -17,6 +17,11 @@ export interface SupplierDebt {
   paidAmount: number;
   pendingAmount: number;
   createdAt: string;
+  /**
+   * Hasta qué fecha quedó cubierta esta deuda (ISO 8601). El backend lo usa
+   * para calcular el saldo incremental del proveedor; null si no se envió.
+   */
+  covredUntil?: string | null;
 }
 
 export interface SupplierPayment {
@@ -49,6 +54,12 @@ export interface CreateSupplierDebtPayload {
   supplierId: string;
   description: string;
   totalAmount: number;
+  /**
+   * Opcional a propósito: solo la vista "Rendición por proveedor" lo manda,
+   * porque es la única que sabe hasta qué fecha está cubierta la venta.
+   * /admin/a-pagar no lo envía y el backend lo guarda como null.
+   */
+  covredUntil?: string | null;
 }
 
 export interface CreateSupplierPaymentPayload {
@@ -72,6 +83,7 @@ interface RawDebt {
   paidAmount: number | string;
   pendingAmount: number | string;
   createdAt: string;
+  covredUntil?: string | null;
 }
 
 const normalizeDebt = (raw: RawDebt): SupplierDebt => ({
@@ -84,6 +96,7 @@ const normalizeDebt = (raw: RawDebt): SupplierDebt => ({
   paidAmount: toNum(raw.paidAmount),
   pendingAmount: toNum(raw.pendingAmount),
   createdAt: raw.createdAt,
+  covredUntil: typeof raw.covredUntil === 'string' ? raw.covredUntil : null,
 });
 
 const normalizeList = (payload: unknown): SupplierDebt[] => {

@@ -155,15 +155,24 @@ export const getCashSummary = async (date?: string): Promise<CashSummary> => {
 };
 
 export interface SupplierProfit {
-  supplierId: string;
+  /**
+   * Id real del proveedor, o `null` para el bucket "Sin proveedor" (ventas de
+   * productos sin marca). Es `null` y no un string: el backend lo manda así y
+   * no hay proveedor al que associate una deuda.
+   */
+  supplierId: string | null;
   supplierName: string;
   sales: number;
   profit: number;
   orders?: number;
-  /** Monto ya registrado como deuda para el período (viene del backend). */
-  alreadyRegistered: number;
-  /** Lo que falta registrar para el período (viene del backend). */
-  pendingToRegister: number;
+  /**
+   * Costo de las ventas del período NO cubierto por deudas previas del
+   * proveedor (solo lo que queda pendiente de registrar como deuda). Lo manda
+   * el backend; si no viaja queda `undefined` y la vista calcula venta − ganancia.
+   */
+  payableAmount?: number;
+  /** Último `covredUntil` de las deudas activas del proveedor, si existe. */
+  lastCovredUntil?: string | null;
 }
 
 interface SupplierProfitRaw {
@@ -179,8 +188,10 @@ interface SupplierProfitRaw {
   profit?: number;
   gain?: number;
   orders?: number;
-  alreadyRegistered?: number;
-  pendingToRegister?: number;
+  // Campos opcionales: el backend los manda, pero el front sigue funcionando
+  // contra backends viejos que no los incluyen.
+  payableAmount?: number | string;
+  lastCovredUntil?: string | null;
 }
 
 type ProfitBySupplierResponse =
@@ -193,12 +204,14 @@ const normalizeSupplierProfit = (raw: SupplierProfit | SupplierProfitRaw): Suppl
   const nested = typeof record.supplier === 'object' ? record.supplier : undefined;
   const sales = Number(record.totalSales ?? record.sales ?? record.total ?? record.revenue ?? 0);
   const profit = Number(record.totalProfit ?? record.profit ?? record.gain ?? 0);
-  const alreadyRegistered = Number(record.alreadyRegistered ?? 0);
-  const pendingRaw = record.pendingToRegister;
-  const pendingFallback = (Number.isFinite(sales) ? sales : 0) - (Number.isFinite(profit) ? profit : 0);
-  const pendingToRegister = Number(pendingRaw ?? pendingFallback);
+  const payable = Number(record.payableAmount);
   return {
-    supplierId: record.supplierId ?? nested?.id ?? record.supplierName ?? '',
+    // Un id vacío o el nombre del proveedor NO son un id: la fila "Sin proveedor"
+    // viene con supplierId null y caía en `?? record.supplierName`, así que
+    // terminaba con supplierId = "Sin proveedor". Después cualquier validación
+    // que comparara el id contra la lista de proveedores veía un valor truthy y
+    // daba por hecho que había un proveedor al que cobrarle.
+    supplierId: record.supplierId ?? nested?.id ?? null,
     supplierName:
       record.supplierName ??
       record.name ??
@@ -207,8 +220,9 @@ const normalizeSupplierProfit = (raw: SupplierProfit | SupplierProfitRaw): Suppl
     sales: Number.isFinite(sales) ? sales : 0,
     profit: Number.isFinite(profit) ? profit : 0,
     orders: typeof record.orders === 'number' ? record.orders : undefined,
-    alreadyRegistered: Number.isFinite(alreadyRegistered) ? alreadyRegistered : 0,
-    pendingToRegister: Number.isFinite(pendingToRegister) ? pendingToRegister : 0,
+    // `undefined` cuando el backend no lo manda: la vista cae al cálculo local.
+    payableAmount: Number.isFinite(payable) ? payable : undefined,
+    lastCovredUntil: typeof record.lastCovredUntil === 'string' ? record.lastCovredUntil : null,
   };
 };
 
@@ -446,10 +460,16 @@ export interface WhatsappLinkResponse {
 /**
  * Llama a POST /orders/whatsapp-link para que el backend valide el carrito,
  * cree la Order en estado PENDING y devuelva el link de WhatsApp.
+ * El token de reCAPTCHA viaja en el header `x-recaptcha-token`.
  */
 export const createWhatsappLink = async (
   payload: CreateWhatsappLinkPayload,
+  recaptchaToken: string,
 ): Promise<WhatsappLinkResponse> => {
-  const response = await api.post<WhatsappLinkResponse>('/orders/whatsapp-link', payload);
+  const response = await api.post<WhatsappLinkResponse>('/orders/whatsapp-link', payload, {
+    headers: {
+      'x-recaptcha-token': recaptchaToken,
+    },
+  });
   return response.data;
 };
