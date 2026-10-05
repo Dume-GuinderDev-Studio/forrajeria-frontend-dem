@@ -30,3 +30,4 @@ coverage
 skills/
 # Local Pi runtime state
 .atl/
+*.dump
