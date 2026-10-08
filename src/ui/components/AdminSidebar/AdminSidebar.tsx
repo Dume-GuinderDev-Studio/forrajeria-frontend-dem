@@ -68,7 +68,7 @@ export const AdminSidebar = () => {
         <div className={styles.header}>
           {!collapsed && (
             <span className={styles.brand}>
-              BAS <span className={styles.brandAccent}>Admin</span>
+              <span className={styles.brandAccent}>Admin</span>
             </span>
           )}
           <button onClick={() => setCollapsed(!collapsed)} className={styles.collapseBtn}>
@@ -238,12 +238,7 @@ const NavItem = ({
   const active = pathname === to || pathname.startsWith(`${to}/`);
 
   return (
-    <Link
-      to={to}
-      className={styles.navItem}
-      data-active={active}
-      data-centered={collapsed}
-    >
+    <Link to={to} className={styles.navItem} data-active={active} data-centered={collapsed}>
       {icon}
       {!collapsed && <span className={styles.navLabel}>{label}</span>}
     </Link>

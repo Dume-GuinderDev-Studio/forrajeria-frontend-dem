@@ -5,8 +5,8 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   // Configura tus datos aquí
-  const whatsappNumber = '+542284474673'; // Reemplazar con el número real
-  const instagramHandle = 'forrajeria_bas/'; // Reemplazar con el usuario real
+  const whatsappNumber = '+5422844716778'; // Reemplazar con el número real
+  const instagramHandle = 'forrajeria/'; // Reemplazar con el usuario real
 
   return (
     <footer className={styles.root}>
@@ -19,7 +19,7 @@ export const Footer = () => {
                 <img src="/logo.png" alt="BAS Pet Shop" className={styles.logoImg} />
               </div>
               <div>
-                <h3 className={styles.brandName}>BAS Pet Shop</h3>
+                <h3 className={styles.brandName}>Pet Shop</h3>
                 <p className={styles.tagline}>"Tu mascota feliz"</p>
               </div>
             </div>
@@ -61,9 +61,7 @@ export const Footer = () => {
 
         {/* Divider */}
         <div className={styles.divider}>
-          <p className={styles.copy}>
-            © {currentYear} BAS Pet Shop. Todos los derechos reservados.
-          </p>
+          <p className={styles.copy}>© {currentYear} Pet Shop. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

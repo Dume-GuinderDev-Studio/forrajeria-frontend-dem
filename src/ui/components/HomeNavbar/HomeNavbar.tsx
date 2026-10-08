@@ -26,7 +26,7 @@ export const HomeNavbar = ({ onOpenCart }: HomeNavbarProps) => {
             />
           </div>
           <div className={styles.titles}>
-            <h1 className={styles.name}>BAS Pet Shop</h1>
+            <h1 className={styles.name}>Pet Shop</h1>
             <p className={styles.tagline}>"Tu mascota feliz"</p>
           </div>
         </div>

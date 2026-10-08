@@ -98,7 +98,7 @@ export const LoginPage = () => {
                 }}
               />
             </div>
-            <h1 className={styles.brandName}>BAS Pet Shop</h1>
+            <h1 className={styles.brandName}>Pet Shop</h1>
             <p className={styles.tagline}>"Tu mascota feliz"</p>
           </div>
 
@@ -296,7 +296,7 @@ export const LoginPage = () => {
           </div>
 
           <div className={styles.footer}>
-            &copy; {new Date().getFullYear()} Sistema de Gestión BAS
+            &copy; {new Date().getFullYear()} Sistema de Gestión Forrajeria
           </div>
         </div>
       </div>
