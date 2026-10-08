@@ -664,6 +664,90 @@ describe('ProductForm (marca)', () => {
   });
 });
 
+describe('Calculadora de precio (nuevo/editar producto)', () => {
+  it('calcula y redondea bien (costo 143166 con 20% da 171799)', async () => {
+    const user = userEvent.setup();
+    mockApi({ categories: CATEGORIAS });
+    render(<ProductForm product={null} />);
+
+    const costoInput = screen.getByPlaceholderText('Opcional');
+    await user.type(costoInput, '143166');
+    const gananciaInput = screen.getByLabelText('Ganancia sobre costo (%)');
+    await user.type(gananciaInput, '20');
+    await user.click(screen.getByRole('button', { name: /Calcular precio/i }));
+
+    const precioInput = screen.getAllByDisplayValue('171799')[0];
+    expect(precioInput).toBeInTheDocument();
+  });
+
+  it('deshabilitado sin costo', async () => {
+    render(<ProductForm product={null} />);
+    const calcularBtn = screen.getByRole('button', { name: /Calcular precio/i });
+    expect(calcularBtn).toBeDisabled();
+  });
+
+  it('no aparece en el payload', async () => {
+    const user = userEvent.setup();
+    mockApi({ categories: CATEGORIAS });
+    render(<ProductForm product={null} />);
+
+    await user.type(screen.getByPlaceholderText('Ej: Royal Canin Cachorro 15kg'), 'Test');
+    await user.type(screen.getAllByRole('spinbutton')[2], '10'); // stock
+    const precioInput = screen.getAllByRole('spinbutton')[0];
+    await user.clear(precioInput);
+    await user.type(precioInput, '1000');
+    const costoInput = screen.getByPlaceholderText('Opcional');
+    await user.type(costoInput, '800');
+    const gananciaInput = screen.getByLabelText('Ganancia sobre costo (%)');
+    await user.type(gananciaInput, '25');
+    await user.click(screen.getByRole('button', { name: /Calcular precio/i }));
+
+    const selects = screen.getAllByRole('combobox');
+    await user.selectOptions(selects[0], 'c1');
+
+    await screen.findByText('Venta por Bolsa');
+    await user.type(screen.getByPlaceholderText('Peso (kg)'), '15');
+
+    await user.click(screen.getByRole('button', { name: /Guardar Producto/i }));
+    await waitFor(() => expect(apiMock.post).toHaveBeenCalled());
+    const payload = apiMock.post.mock.calls[0][1] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty('ganancia');
+    expect(payload).not.toHaveProperty('profitMarginPercent');
+    expect(payload.price).toBe(1000);
+  });
+
+  it('editar el precio a mano después del cálculo se respeta', async () => {
+    const user = userEvent.setup();
+    mockApi({ categories: CATEGORIAS });
+    render(<ProductForm product={null} />);
+
+    await user.type(screen.getByPlaceholderText('Opcional'), '800');
+    await user.type(screen.getByLabelText('Ganancia sobre costo (%)'), '25');
+    await user.click(screen.getByRole('button', { name: /Calcular precio/i }));
+    await waitFor(() => {
+      const priceInputs = screen.getAllByRole('spinbutton');
+      const priceInput = priceInputs[0] as HTMLInputElement;
+      expect(priceInput.value).toBe('1000');
+    });
+
+    await user.clear(screen.getAllByRole('spinbutton')[0]);
+    await user.type(screen.getAllByRole('spinbutton')[0], '950');
+
+    await user.type(screen.getByPlaceholderText('Ej: Royal Canin Cachorro 15kg'), 'Test');
+    await user.type(screen.getAllByRole('spinbutton')[2], '10'); // stock
+    const selects = screen.getAllByRole('combobox');
+    await user.selectOptions(selects[0], 'c1');
+
+    await screen.findByText('Venta por Bolsa');
+    await user.type(screen.getByPlaceholderText('Peso (kg)'), '15');
+
+    await user.click(screen.getByRole('button', { name: /Guardar Producto/i }));
+    await waitFor(() => expect(apiMock.post).toHaveBeenCalled());
+    const payload = apiMock.post.mock.calls[0][1] as Record<string, unknown>;
+    expect(payload.price).toBe(950);
+  });
+});
+
 describe('productSchema (marca)', () => {
   it('rechaza una marca vacía en vez de aceptarla en silencio', () => {
     const base = {

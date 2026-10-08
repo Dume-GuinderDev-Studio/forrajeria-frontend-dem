@@ -136,6 +136,7 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isBrandsLoading, setIsBrandsLoading] = useState(true);
+  const [profitMarginPercent, setProfitMarginPercent] = useState<string>('');
 
   const [presentationsData, setPresentationsData] = useState<{
     bagRow: PresentationRow;
@@ -294,6 +295,7 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
         esCategoriaOtros(product?.category?.name) && tienePresentaciones(product),
       );
       setBagWeightError(undefined);
+      setProfitMarginPercent('');
       setPendingRemoval(null);
     } else {
       reset({
@@ -309,6 +311,7 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
       });
       setOtrosVentaPorBolsa(false);
       setBagWeightError(undefined);
+      setProfitMarginPercent('');
       setPendingRemoval(null);
       originalRef.current = null;
     }
@@ -521,6 +524,28 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
   const generalPrice = finiteNumberOrNull(watchedPrice);
   const generalCost = finiteNumberOrNull(watchedCost);
 
+  const canCalculate = useMemo(() => {
+    const cost = generalCost;
+    if (cost === null || cost === undefined || cost === 0) return false;
+    const pctStr = profitMarginPercent.trim();
+    if (pctStr === '') return false;
+    const pct = Number(pctStr);
+    if (!Number.isFinite(pct) || pct < 0) return false;
+    return true;
+  }, [generalCost, profitMarginPercent]);
+
+  const handleCalculatePrice = () => {
+    const cost = generalCost;
+    if (cost === null || cost === undefined || cost === 0) return;
+    const pctStr = profitMarginPercent.trim();
+    if (pctStr === '') return;
+    const pct = Number(pctStr);
+    if (!Number.isFinite(pct) || pct < 0) return;
+    const calculated = cost * (1 + pct / 100);
+    const rounded = Math.round(calculated);
+    setValue('price', rounded, { shouldValidate: true, shouldDirty: true });
+  };
+
   return (
     <div className={styles.root}>
       {/* El título vive en el Sheet contenedor: no duplicarlo acá. */}
@@ -666,6 +691,32 @@ export const ProductForm = ({ product, onSuccess }: ProductFormProps) => {
                 .join(' ')}
             />
             {errors.cost && <p className={styles.fieldError}>{errors.cost.message}</p>}
+          </div>
+        </div>
+
+        {/* Calculadora de precio */}
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="profitMarginPercent">Ganancia sobre costo (%)</label>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              id="profitMarginPercent"
+              type="number"
+              step="0.01"
+              value={profitMarginPercent}
+              onChange={(e) => setProfitMarginPercent(e.target.value)}
+              placeholder="Ej: 20"
+              className={styles.input}
+              style={{ flex: '1 1 120px', minWidth: '120px' }}
+            />
+            <button
+              type="button"
+              onClick={handleCalculatePrice}
+              disabled={!canCalculate}
+              className={styles.submit}
+              style={{ flex: '0 0 auto', padding: '0.75rem 1.5rem', marginTop: 0 }}
+            >
+              Calcular precio
+            </button>
           </div>
         </div>
 
