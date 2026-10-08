@@ -460,16 +460,22 @@ export interface WhatsappLinkResponse {
 /**
  * Llama a POST /orders/whatsapp-link para que el backend valide el carrito,
  * cree la Order en estado PENDING y devuelva el link de WhatsApp.
- * El token de reCAPTCHA viaja en el header `x-recaptcha-token`.
+ * El token de reCAPTCHA viaja en el header `x-recaptcha-token`, pero SOLO si
+ * se pasa un token: con el interruptor del frontend
+ * `VITE_RECAPTCHA_ENABLED=false` no se manda ningún header y el backend (sin
+ * `RECAPTCHA_SECRET_KEY` configurada) valida igual, salteando el guard.
  */
 export const createWhatsappLink = async (
   payload: CreateWhatsappLinkPayload,
-  recaptchaToken: string,
+  recaptchaToken?: string,
 ): Promise<WhatsappLinkResponse> => {
-  const response = await api.post<WhatsappLinkResponse>('/orders/whatsapp-link', payload, {
-    headers: {
-      'x-recaptcha-token': recaptchaToken,
-    },
-  });
+  // Sin token (reCAPTCHA deshabilitado) omitimos `headers` por completo:
+  // mandarlo vacío no aporta nada y fallaría si el backend tuviera el secret.
+  const headers = recaptchaToken ? { 'x-recaptcha-token': recaptchaToken } : undefined;
+  const response = await api.post<WhatsappLinkResponse>(
+    '/orders/whatsapp-link',
+    payload,
+    headers ? { headers } : {},
+  );
   return response.data;
 };

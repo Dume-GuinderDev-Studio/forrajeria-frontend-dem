@@ -1,5 +1,11 @@
-import { describe, expect, it, vi, type Mock } from 'vitest';
-import { createManualOrder, confirmOrder, getMySalesToday, getProfitBySupplier } from './orders.service';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import {
+  confirmOrder,
+  createManualOrder,
+  createWhatsappLink,
+  getMySalesToday,
+  getProfitBySupplier,
+} from './orders.service';
 import api from './api';
 
 vi.mock('./api', () => ({
@@ -103,5 +109,49 @@ describe('getProfitBySupplier (normalización de la fila)', () => {
     const [row] = await getProfitBySupplier();
 
     expect(row.payableAmount).toBeUndefined();
+  });
+});
+
+describe('createWhatsappLink (header x-recaptcha-token)', () => {
+  const payload = {
+    cart: [{ productId: 'p1', quantity: 2, unit: 'Bolsa' as const }],
+    customerName: 'María',
+    customerPhone: '1155555555',
+  };
+
+  // El mock de ./api acumula llamadas de todo el archivo: limpiamos para que
+  // las aserciones miren solo la llamada de este test.
+  beforeEach(() => {
+    apiPost.mockClear();
+  });
+
+  it('envía el header x-recaptcha-token cuando hay token (reCAPTCHA activado)', async () => {
+    apiPost.mockResolvedValue({ data: { orderId: 'ord-1', link: 'https://wa.me/1' } });
+
+    await createWhatsappLink(payload, 'tok');
+
+    expect(apiPost).toHaveBeenCalledWith('/orders/whatsapp-link', payload, {
+      headers: { 'x-recaptcha-token': 'tok' },
+    });
+  });
+
+  it('omite el header por completo cuando no hay token (interruptor apagado)', async () => {
+    apiPost.mockResolvedValue({ data: { orderId: 'ord-1', link: 'https://wa.me/1' } });
+
+    await createWhatsappLink(payload);
+
+    expect(apiPost).toHaveBeenCalledWith('/orders/whatsapp-link', payload, {});
+    const [, , config] = apiPost.mock.calls[0];
+    expect(config).not.toHaveProperty('headers');
+  });
+
+  it('omite el header también cuando el token viene vacío', async () => {
+    apiPost.mockResolvedValue({ data: { orderId: 'ord-1', link: 'https://wa.me/1' } });
+
+    await createWhatsappLink(payload, '');
+
+    expect(apiPost).toHaveBeenCalledWith('/orders/whatsapp-link', payload, {});
+    const [, , config] = apiPost.mock.calls[0];
+    expect(config).not.toHaveProperty('headers');
   });
 });
