@@ -151,7 +151,7 @@ export const AdminSidebar = () => {
           <SheetContent side="left" className={styles.drawerContent}>
             <div className={styles.drawerHeader}>
               <span className={styles.brand}>
-                BAS <span className={styles.brandAccent}>Admin</span>
+                <span className={styles.brandAccent}>Admin</span>
               </span>
             </div>
             <nav className={styles.nav}>
